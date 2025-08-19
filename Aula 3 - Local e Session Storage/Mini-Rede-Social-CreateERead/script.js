@@ -22,17 +22,38 @@ let posts = [
 
 // Inicialização
 window.onload = function() {
+    carregarPostsLocalStorage();
     displayPosts();
 
-    document.getElementById('postForm').addEventListener('submit', addPost); 
+    document.getElementById('postForm').addEventListener('submit', addPost);
+    document.querySelector("#postList").addEventListener("click", handleClick);
+
+    // localStorage.setItem("nome", "Santos!")
+    // console.log(localStorage.getItem("nome"));
+    // localStorage.removeItem("nome")
+    // localStorage.clear()
 };
+
+const handleClick = (infosDoEvento) => {
+    const acaoBtn = infosDoEvento.target.dataset.action;
+    const indicePost = infosDoEvento.target.dataset.index;
+    
+    if(!acaoBtn) return;
+
+    if(acaoBtn === "Editar"){
+        editarPost(indicePost) 
+    }
+    else if(acaoBtn === "Apagar"){
+        apagarPost(indicePost)
+    }
+}
 
 // Função para exibir os posts
 function displayPosts() {
     const postList = document.getElementById('postList');
     postList.innerHTML = '';
 
-    posts.forEach(pegaPost => {
+    posts.forEach((pegaPost, index) => {
             const postElement = document.createElement('div');
             postElement.classList.add('card-post');
   
@@ -41,8 +62,8 @@ function displayPosts() {
                 ${pegaPost.image ? `<img src="${pegaPost.image}" alt="Imagem do post" style="max-width:150px;">` : ""}
                 <p><em>Categoria: ${pegaPost.category}</em></p>
                 <p><em>Data e Hora: ${pegaPost.date}</em></p>
-                <button><i class="fa-solid fa-pen-to-square"></i> Editar</button>
-                <button><i class="fa-solid fa-eraser"></i> Apagar</button>
+                <button data-action="Editar" data-index=${index}><i class="fa-solid fa-pen-to-square"></i> Editar</button>
+                <button data-action="Apagar" data-index=${index}><i class="fa-solid fa-eraser"></i> Apagar</button>
                 <hr style="margin:30px;">`;
                
             postList.append(postElement);
@@ -66,8 +87,39 @@ function addPost(event) {
     };
     
     posts.unshift(post);
+    salvarLocalStorage();
     
-    document.getElementById('postForm').reset();
+    document.querySelector('#postForm').reset();
     
     displayPosts();
+}
+
+//UPDATE
+const editarPost = (indicePost) => {
+    const novoTexto = prompt("Edite o conteúdo do seu post", posts[indicePost].text)
+    posts[indicePost].text = novoTexto
+    displayPosts()
+}
+
+//DELETE
+const apagarPost = (indicePost) => {
+
+    const confirmar = confirm("Deseja realmente excluir esse post?")
+
+    if(confirmar){
+        posts.splice(indicePost, 1);
+        displayPosts();
+    }
+}
+
+const salvarLocalStorage = () => {
+    localStorage.setItem("posts", JSON.stringify(posts))
+}
+
+const carregarPostsLocalStorage = () => {
+    postsGuardados = localStorage.getItem("posts")
+
+    if (postsGuardados) {
+        posts = JSON.parse(postsGuardados)
+    }
 }
